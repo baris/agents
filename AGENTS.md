@@ -17,6 +17,8 @@ These rules define the default operating procedure for coding agents in this wor
 - Each concern lives in its own module with clear boundaries.
 - Any architectural change must be reflected immediately.
 - No architectural drift.
+- For a new project, do not touch code until the user explicitly confirms the architecture is ready.
+- If architecture changes are needed after coding has started, stop and request explicit user confirmation before proceeding.
 
 ## Decision Records (ADRs)
 - Record significant design/architecture choices in `docs/decisions/`.
