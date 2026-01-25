@@ -10,6 +10,14 @@ These rules define the default operating procedure for coding agents in this wor
 - Optional: `docs/DATA-SCHEMAS.md` or other docs as needed
 - The only documentation file allowed at repo root is `README.md`.
 
+## Prototype Mode (Explicit Opt-In)
+- When the user explicitly requests a prototype or spike:
+  - Skip `docs/` scaffolding and ADRs.
+  - Minimize tests to sanity checks only.
+  - Prefix all created files/directories with `prototype_` or place in `_prototype/`.
+  - At prototype end, the user decides: discard, or promote to production (which triggers full documentation and test requirements).
+- Prototype mode must be explicitly requested; never assume it.
+
 ## Architecture Is the Source of Truth
 - Always read and update `docs/ARCHITECTURE.md` before writing code.
 - Architecture must reflect both current implementation and the intended clean end state.
@@ -20,20 +28,27 @@ These rules define the default operating procedure for coding agents in this wor
 - For a new project, do not touch code until the user explicitly confirms the architecture is ready.
 - If architecture changes are needed after coding has started, stop and request explicit user confirmation before proceeding.
 
+## Existing Codebase Handling
+- If `docs/ARCHITECTURE.md` does not exist:
+  - For small tasks (bug fixes, minor changes): proceed without it, but note its absence.
+  - For significant work: ask the user whether to create it first or proceed without.
+- If existing architecture docs are outdated or contradict the code:
+  - Flag the discrepancy explicitly.
+  - Ask whether to update docs to match code, refactor code to match docs, or proceed as-is.
+- Never silently ignore architectural contradictions.
+
 ## Decision Records (ADRs)
 - Record significant design/architecture choices in `docs/decisions/`.
 - Format: context -> decision -> alternatives -> consequences.
 - Accepted decisions are immutable; changes require a new ADR.
 
-## Planning Discipline
-- Organize by date-based sections.
-- Any committed change must appear in the relevant documents.
-- Remove implemented sections after completion and architecture updates.
-
-## TODO Execution Queue
-- `docs/TODO.md` is the active task list.
+## Planning & TODO Management
+- `docs/TODO.md` is the active task list, organized by priority.
 - Update it at the start and end of every feature or bugfix.
-- Mark completed items as `DONE` with date/time.
+- Completed items are removed or moved to a `## Completed` section with date stamps.
+- ADRs in `docs/decisions/` use date-prefixed filenames: `YYYY-MM-DD-<slug>.md`.
+- Any committed change must be reflected in the relevant docs before the task is complete.
+- Keep planning docs current; stale docs are worse than no docs.
 
 ## Definition of Done (Mandatory)
 A task is complete only when all of the following are true:
@@ -50,12 +65,14 @@ A task is complete only when all of the following are true:
 - Formatting-only/mechanical changes must be isolated.
 - If you cannot run git commands, provide the exact commands to run.
 
-## Testing Strategy (TDD)
-- Write tests first.
+## Testing Strategy
+- Tests must exist and pass before a task is considered complete.
+- Prefer test-first when feasible, but the hard constraint is coverage at completion, not test-first process.
 - Unit tests live in `tests/`.
 - Integration tests live in `tests/integration/` when applicable.
-- Run all relevant tests after each major change.
+- Run all relevant tests after each significant change.
 - No feature is complete without core-logic test coverage.
+- When modifying existing code, ensure existing tests still pass before adding new ones.
 
 ## External API Usage
 - Use external APIs efficiently (cache, batch, limit).
@@ -86,13 +103,14 @@ A task is complete only when all of the following are true:
 - Be explicit about fail-fast vs continue-on-error.
 - Seed randomness unless non-determinism is required.
 
-## Virtual Environments
-- Isolate dependencies:
-  - Python: `venv`
-  - Node: `nvm`
-  - Go: go workspace
-  - Rust: `cargo`
-- Do not install dependencies globally without approval.
+## Dependency Isolation
+- Always isolate project dependencies:
+  - Python: `venv` or `uv`
+  - Node: project-local `node_modules` with lockfile (`package-lock.json` or `pnpm-lock.yaml`)
+  - Go: go modules (`go.mod`)
+  - Rust: `cargo` (workspace-level `Cargo.lock`)
+- Do not install dependencies globally without explicit approval.
+- Commit lockfiles; they are source of truth for reproducible builds.
 
 ## Tooling & Code Quality
 - Use standard formatting, linting, and typing tools for the language.
@@ -106,6 +124,16 @@ A task is complete only when all of the following are true:
 - Do not introduce heavy dependencies without justification.
 - Do not modify data schemas silently.
 - Do not optimize prematurely; measure first.
+
+## Ambiguity and Conflict Resolution
+- When instructions conflict or are ambiguous:
+  - Explicit user instructions override these defaults.
+  - Ask for clarification before proceeding if the ambiguity affects correctness or architecture.
+  - For low-risk ambiguity, state your assumption and proceed.
+- When in doubt between action and inaction:
+  - For destructive or irreversible operations: ask first.
+  - For additive or easily-reversible operations: proceed, but explain what you did.
+- If you encounter a situation these rules don't cover, apply the principle: "minimize surprise, maximize reversibility."
 
 ## User Context (Always Assume)
 - The user is an experienced professional engineer with extensive coding experience.
