@@ -4,11 +4,12 @@ These rules define the default operating procedure for coding agents in this wor
 
 ## Documentation First
 - At project start, create a `docs/` directory containing:
-  - `docs/ARCHITECTURE.md`
-  - `docs/TODO.md`
-  - `docs/decisions/` for ADRs
+  - `docs/ARCHITECTURE.md` (use template: `docs/templates/ARCHITECTURE.template.md`)
+  - `docs/TODO.md` (use template: `docs/templates/TODO.template.md`)
+  - `docs/decisions/` for ADRs (use template: `docs/templates/ADR.template.md`)
 - Optional: `docs/DATA-SCHEMAS.md` or other docs as needed
 - The only documentation file allowed at repo root is `README.md`.
+- Templates define the expected format; follow them exactly.
 
 ## Prototype Mode (Explicit Opt-In)
 - When the user explicitly requests a prototype or spike:
