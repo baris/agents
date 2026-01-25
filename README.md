@@ -8,24 +8,34 @@ Production-grade instructions and tooling for AI coding agents (Claude Code, Gem
 # 1. Clone this repo
 git clone <repo-url> ~/agents
 
-# 2. Set up global configuration (applies to all projects)
+# 2. Install global configuration (applies to all projects)
 ~/agents/scripts/bootstrap.sh
 
 # 3. Done. All agents now use these rules globally.
 ```
 
-## Files
+## What You Get
+
+**Global configuration:**
+- `~/.gemini/GEMINI.md` - Instructions for Gemini CLI & Antigravity
+- `~/.claude/CLAUDE.md` - Instructions for Claude Code
+- `~/.gemini/templates/` - Doc templates (ARCHITECTURE, ADR, TODO)
+- `~/.claude/templates/` - Doc templates (ARCHITECTURE, ADR, TODO)
+
+**Utilities:**
+- `scripts/context.sh` - Generate project context for any agent
+
+## Files in This Repo
 
 | File | Purpose |
 |------|---------|
 | `AGENTS.md` | Main instruction set (single source of truth) |
-| `CLAUDE.md` | Symlink → AGENTS.md (Claude Code reads this) |
-| `GEMINI.md` | Gemini-specific instructions (refs AGENTS.md) |
-| `.claudeignore` | Excludes deps, build artifacts from agent context |
+| `CLAUDE.md` | Symlink → AGENTS.md (demonstrates pattern) |
+| `GEMINI.md` | Symlink → AGENTS.md (demonstrates pattern) |
+| `.claudeignore` | Example excludes for Claude Code context |
 | `docs/templates/` | Templates for ARCHITECTURE, ADR, TODO |
-| `scripts/bootstrap.sh` | Setup script for global/project config |
-| `scripts/context.sh` | Generate project context for any agent |
-| `scripts/pre-commit` | Git hook to catch agent mistakes |
+| `scripts/bootstrap.sh` | Installer for global configuration |
+| `scripts/context.sh` | Project context generator |
 
 ## How Agents Read Config
 
@@ -40,39 +50,40 @@ git clone <repo-url> ~/agents
 **Codex:**
 - No native config; pass via `codex --instructions "$(cat ~/agents/AGENTS.md)"`
 
-## Usage
+## Per-Project Overrides (Optional)
 
-### Global Setup (Recommended)
+To customize rules for a specific project:
+
 ```bash
-# Install once, applies to all projects
-~/agents/scripts/bootstrap.sh
-```
-
-Creates:
-- `~/.gemini/GEMINI.md`
-- `~/.claude/CLAUDE.md`
-
-### Per-Project Setup (Optional)
-```bash
-# Only if you need project-specific rules
 cd ~/myproject
-~/agents/scripts/bootstrap.sh .
+
+# Copy the base config
+cp ~/agents/AGENTS.md ./AGENTS.md
+
+# Create agent-specific symlinks or files
+ln -s AGENTS.md CLAUDE.md
+ln -s AGENTS.md GEMINI.md
+
+# Copy templates if needed
+mkdir -p docs/templates
+cp ~/.claude/templates/*.md docs/templates/
+
+# Edit AGENTS.md to customize for this project
 ```
 
-Creates:
-- `./AGENTS.md` (edit this for project overrides)
-- `./CLAUDE.md` → symlink to AGENTS.md
-- `./GEMINI.md` (refs AGENTS.md)
-- `./docs/templates/`
-- `./.claudeignore`
-- `.git/hooks/pre-commit`
+Now agents will use `./AGENTS.md` (or `./CLAUDE.md` / `./GEMINI.md`) instead of the global config when working in this project.
 
-### Generate Context
+## Utilities
+
+### Generate Project Context
+
 ```bash
 # Dump project context for any agent
 ~/agents/scripts/context.sh          # basic
 ~/agents/scripts/context.sh --full   # includes README + entry points
 ```
+
+Useful for giving agents a quick overview of your project.
 
 ## Updating
 
@@ -84,25 +95,29 @@ git pull
 
 ## Customization
 
-Edit `~/agents/AGENTS.md`, then re-run bootstrap to sync:
+Edit `~/agents/AGENTS.md` (the canonical source), then re-run bootstrap:
+
 ```bash
 ~/agents/scripts/bootstrap.sh --force
 ```
 
-## Structure
+Or edit the installed copies directly:
+- `~/.gemini/GEMINI.md`
+- `~/.claude/CLAUDE.md`
+
+## Repository Structure
 
 ```
 ~/agents/
 ├── AGENTS.md                    # Source of truth
-├── CLAUDE.md → AGENTS.md
-├── GEMINI.md
-├── .claudeignore
+├── CLAUDE.md → AGENTS.md        # Symlink (pattern demonstration)
+├── GEMINI.md → AGENTS.md        # Symlink (pattern demonstration)
+├── .claudeignore                # Example excludes
 ├── docs/templates/
 │   ├── ARCHITECTURE.template.md
 │   ├── ADR.template.md
 │   └── TODO.template.md
 └── scripts/
-    ├── bootstrap.sh
-    ├── context.sh
-    └── pre-commit
+    ├── bootstrap.sh             # Global installer
+    └── context.sh               # Context generator
 ```
