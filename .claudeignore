@@ -1,0 +1,86 @@
+# .claudeignore - Files Claude Code should ignore when reading context
+# Similar to .gitignore syntax
+
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.npm/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+target/
+*.min.js
+*.min.css
+*.bundle.js
+*.map
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test artifacts
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.nyc_output/
+
+# Large/binary files
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.dat
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Secrets (should also be in .gitignore)
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+secrets.yaml
+
+# Generated documentation (read source instead)
+docs/api/
+site/
+public/docs/
+
+# Package locks (usually not useful context)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+Gemfile.lock
+poetry.lock
+Cargo.lock
+go.sum
