@@ -72,33 +72,46 @@ else
     echo "✓ Installed ~/.claude/CLAUDE.md"
 fi
 
+# All templates to install
+TEMPLATES=(
+    "ARCHITECTURE.template.md"
+    "ADR.template.md"
+    "TODO.template.md"
+    "DONE.template.md"
+    "pre-commit-config.yaml"
+)
+
 # Install templates for Gemini
-for template in ARCHITECTURE.template.md ADR.template.md TODO.template.md; do
-    if [[ -f ~/.gemini/templates/$template ]]; then
-        if confirm_overwrite "~/.gemini/templates/$template"; then
-            cp "$AGENTS_REPO/docs/templates/$template" ~/.gemini/templates/
-            echo "✓ Overwrote ~/.gemini/templates/$template"
+for template in "${TEMPLATES[@]}"; do
+    if [[ -f "$AGENTS_REPO/docs/templates/$template" ]]; then
+        if [[ -f ~/.gemini/templates/$template ]]; then
+            if confirm_overwrite "~/.gemini/templates/$template"; then
+                cp "$AGENTS_REPO/docs/templates/$template" ~/.gemini/templates/
+                echo "✓ Overwrote ~/.gemini/templates/$template"
+            else
+                echo "⊘ Skipped ~/.gemini/templates/$template"
+            fi
         else
-            echo "⊘ Skipped ~/.gemini/templates/$template"
+            cp "$AGENTS_REPO/docs/templates/$template" ~/.gemini/templates/
+            echo "✓ Installed ~/.gemini/templates/$template"
         fi
-    else
-        cp "$AGENTS_REPO/docs/templates/$template" ~/.gemini/templates/
-        echo "✓ Installed ~/.gemini/templates/$template"
     fi
 done
 
 # Install templates for Claude
-for template in ARCHITECTURE.template.md ADR.template.md TODO.template.md; do
-    if [[ -f ~/.claude/templates/$template ]]; then
-        if confirm_overwrite "~/.claude/templates/$template"; then
-            cp "$AGENTS_REPO/docs/templates/$template" ~/.claude/templates/
-            echo "✓ Overwrote ~/.claude/templates/$template"
+for template in "${TEMPLATES[@]}"; do
+    if [[ -f "$AGENTS_REPO/docs/templates/$template" ]]; then
+        if [[ -f ~/.claude/templates/$template ]]; then
+            if confirm_overwrite "~/.claude/templates/$template"; then
+                cp "$AGENTS_REPO/docs/templates/$template" ~/.claude/templates/
+                echo "✓ Overwrote ~/.claude/templates/$template"
+            else
+                echo "⊘ Skipped ~/.claude/templates/$template"
+            fi
         else
-            echo "⊘ Skipped ~/.claude/templates/$template"
+            cp "$AGENTS_REPO/docs/templates/$template" ~/.claude/templates/
+            echo "✓ Installed ~/.claude/templates/$template"
         fi
-    else
-        cp "$AGENTS_REPO/docs/templates/$template" ~/.claude/templates/
-        echo "✓ Installed ~/.claude/templates/$template"
     fi
 done
 
@@ -107,11 +120,18 @@ echo "✓ Global agent configuration installed:"
 echo ""
 echo "  ~/.gemini/"
 echo "    GEMINI.md           - Agent instructions for Gemini CLI & Antigravity"
-echo "    templates/          - Doc templates (ARCHITECTURE, ADR, TODO)"
+echo "    templates/          - Doc templates (ARCHITECTURE, ADR, TODO, DONE, pre-commit)"
 echo ""
 echo "  ~/.claude/"
 echo "    CLAUDE.md           - Agent instructions for Claude Code"
-echo "    templates/          - Doc templates (ARCHITECTURE, ADR, TODO)"
+echo "    templates/          - Doc templates (ARCHITECTURE, ADR, TODO, DONE, pre-commit)"
+echo ""
+echo "Templates include:"
+echo "  - ARCHITECTURE.template.md  - Project architecture documentation"
+echo "  - ADR.template.md           - Architecture Decision Records"
+echo "  - TODO.template.md          - Task tracking"
+echo "  - DONE.template.md          - Definition of Done checklist"
+echo "  - pre-commit-config.yaml    - Pre-commit hooks configuration"
 echo ""
 echo "These apply to ALL projects unless overridden by project-level AGENTS.md,"
 echo "CLAUDE.md, or GEMINI.md files in the project root."

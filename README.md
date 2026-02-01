@@ -2,6 +2,15 @@
 
 Production-grade instructions and tooling for AI coding agents (Claude Code, Gemini CLI, Antigravity, Codex).
 
+## What's Enforced
+
+- **Testing**: 80% coverage for core logic, 50% overall, error paths tested
+- **Type Safety**: `mypy --strict` for Python, `strict: true` for TypeScript
+- **Error Handling**: No bare `except:`, specific exceptions with logging
+- **Secrets**: Never in code, environment variables only, gitleaks detection
+- **Code Size**: Files <400 LOC, functions <50 LOC
+- **Pre-commit Hooks**: Linting, type checking, secrets detection
+
 ## Quick Start
 
 ```bash
@@ -19,11 +28,19 @@ git clone <repo-url> ~/agents
 **Global configuration:**
 - `~/.gemini/GEMINI.md` - Instructions for Gemini CLI & Antigravity
 - `~/.claude/CLAUDE.md` - Instructions for Claude Code
-- `~/.gemini/templates/` - Doc templates (ARCHITECTURE, ADR, TODO)
-- `~/.claude/templates/` - Doc templates (ARCHITECTURE, ADR, TODO)
+- `~/.gemini/templates/` - Doc templates
+- `~/.claude/templates/` - Doc templates
+
+**Templates included:**
+- `ARCHITECTURE.template.md` - Project architecture documentation
+- `ADR.template.md` - Architecture Decision Records
+- `TODO.template.md` - Task tracking
+- `DONE.template.md` - Definition of Done checklist
+- `pre-commit-config.yaml` - Pre-commit hooks configuration
 
 **Utilities:**
 - `scripts/context.sh` - Generate project context for any agent
+- `scripts/bootstrap.sh` - Install/update global configuration
 
 ## Files in This Repo
 
@@ -114,10 +131,29 @@ Or edit the installed copies directly:
 ├── GEMINI.md → AGENTS.md        # Symlink (pattern demonstration)
 ├── .claudeignore                # Example excludes
 ├── docs/templates/
-│   ├── ARCHITECTURE.template.md
-│   ├── ADR.template.md
-│   └── TODO.template.md
+│   ├── ARCHITECTURE.template.md # Project architecture
+│   ├── ADR.template.md          # Decision records
+│   ├── TODO.template.md         # Task tracking
+│   ├── DONE.template.md         # Definition of Done checklist
+│   └── pre-commit-config.yaml   # Pre-commit hooks
 └── scripts/
     ├── bootstrap.sh             # Global installer
     └── context.sh               # Context generator
+```
+
+## New Project Setup
+
+```bash
+# 1. Initialize project structure
+mkdir -p docs/decisions tests
+
+# 2. Copy templates
+cp ~/.claude/templates/ARCHITECTURE.template.md docs/ARCHITECTURE.md
+cp ~/.claude/templates/TODO.template.md docs/TODO.md
+
+# 3. Set up pre-commit hooks
+cp ~/.claude/templates/pre-commit-config.yaml .pre-commit-config.yaml
+pip install pre-commit && pre-commit install
+
+# 4. Edit pre-commit config to remove sections for languages you don't use
 ```
