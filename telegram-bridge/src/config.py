@@ -4,6 +4,10 @@ import os
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from src.logger import get_logger
+
+logger = get_logger("config")
+
 
 class Settings(BaseSettings):
     telegram_bot_token: str = Field(default="", validation_alias="TELEGRAM_BOT_TOKEN")
@@ -13,7 +17,7 @@ class Settings(BaseSettings):
         default="topic_mappings.json", validation_alias="TOPIC_MAPPINGS_FILE"
     )
     default_workspace_dir: str = Field(
-        default="/Users/tbmetin/repos/agents", validation_alias="DEFAULT_WORKSPACE_DIR"
+        default="~/repos/agents", validation_alias="DEFAULT_WORKSPACE_DIR"
     )
 
     # Dictionary containing mapped topic IDs to directory paths
@@ -42,8 +46,7 @@ class Settings(BaseSettings):
     def validate_workspace_dir(cls, v: str) -> str:
         expanded_path = os.path.abspath(os.path.expanduser(v))
         if not os.path.isdir(expanded_path):
-            # We don't crash here if it doesn't exist yet, but we ensure it can be created
-            pass
+            logger.warning("Default workspace directory does not exist: %s", expanded_path)
         return expanded_path
 
     def load_mappings(self) -> None:
@@ -60,7 +63,7 @@ class Settings(BaseSettings):
                 self.topic_mappings = {
                     int(k): os.path.abspath(os.path.expanduser(str(v))) for k, v in data.items()
                 }
-        except Exception as e:
+        except (json.JSONDecodeError, OSError) as e:
             raise ValueError(f"Failed to parse topic mappings file: {e}") from e
 
 

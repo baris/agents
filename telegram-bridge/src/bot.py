@@ -1,9 +1,10 @@
 import asyncio
+import json
 import os
 import uuid
 from typing import Any
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Message
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Message, Update
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -19,7 +20,8 @@ from src.logger import get_logger
 
 logger = get_logger("bot")
 
-# Track running tasks at module level to avoid deep copy pickling errors inside pydantic/deepcopy hooks
+# Track running tasks at module level to avoid deep copy pickling errors
+# inside pydantic/deepcopy hooks.
 RUNNING_TASKS: dict[int | None, asyncio.Task[Any]] = {}
 
 
@@ -121,6 +123,7 @@ class TelegramBridgeBot:
         thread_id = message.message_thread_id
         assert self.agent_manager is not None
         session = self.agent_manager.get_session(thread_id)
+        session.chat_id = update.effective_chat.id if update.effective_chat else None
 
         if session.is_running:
             await message.reply_text(
@@ -129,7 +132,9 @@ class TelegramBridgeBot:
             )
             return
 
-        task = asyncio.create_task(self._process_and_stream_response(update, session, prompt, thread_id))
+        task = asyncio.create_task(
+            self._process_and_stream_response(update, session, prompt, thread_id)
+        )
         RUNNING_TASKS[thread_id] = task
         task.add_done_callback(lambda t: RUNNING_TASKS.pop(thread_id, None))
 
@@ -165,14 +170,14 @@ class TelegramBridgeBot:
                 try:
                     await msg.edit_text(buffer[:4000], parse_mode="Markdown")
                     last_edit_time = now
-                except Exception:
-                    pass  # Ignore transient network/throttled edit failures
+                except Exception as e:
+                    logger.debug("Failed to edit Telegram message chunk: %s", e)
 
         # Final flush
         try:
             await msg.edit_text(buffer[:4000], parse_mode="Markdown")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Failed to edit Telegram message final flush: %s", e)
 
     async def request_approval(self, topic_id: int | None, tool_call: Any) -> bool:
         """Pushes a confirmation request card with buttons to Telegram and awaits response."""
@@ -195,8 +200,11 @@ class TelegramBridgeBot:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        # Dispatch message using default target chat ID
-        chat_id = self.settings.whitelisted_user_id
+        # Resolve target chat ID dynamically based on the session or fallback whitelist
+        assert self.agent_manager is not None
+        session = self.agent_manager.get_session(topic_id)
+        chat_id = session.chat_id or self.settings.whitelisted_user_id
+
         await self.application.bot.send_message(  # type: ignore[union-attr]
             chat_id=chat_id,
             text=details,
@@ -305,6 +313,7 @@ class TelegramBridgeBot:
         thread_id = message.message_thread_id
         assert self.agent_manager is not None
         session = self.agent_manager.get_session(thread_id)
+        session.chat_id = update.effective_chat.id if update.effective_chat else None
 
         if session.is_running:
             await message.reply_text(
@@ -313,7 +322,9 @@ class TelegramBridgeBot:
             )
             return
 
-        task = asyncio.create_task(self._process_and_stream_response(update, session, message.text, thread_id))
+        task = asyncio.create_task(
+            self._process_and_stream_response(update, session, message.text, thread_id)
+        )
         RUNNING_TASKS[thread_id] = task
         task.add_done_callback(lambda t: RUNNING_TASKS.pop(thread_id, None))
 
@@ -379,13 +390,16 @@ class TelegramBridgeBot:
         self.agent_manager.topic_mappings[thread_id or 0] = new_path
 
         try:
-            mappings_path = os.path.join(self.settings.default_workspace_dir, "telegram-bridge", self.settings.topic_mappings_file)
-            import json
+            mappings_path = os.path.join(
+                self.settings.default_workspace_dir,
+                "telegram-bridge",
+                self.settings.topic_mappings_file,
+            )
             serialized_mappings = {str(k): v for k, v in self.agent_manager.topic_mappings.items()}
             with open(mappings_path, "w") as f:
                 json.dump(serialized_mappings, f, indent=2)
-        except Exception as e:
-            logger.error("Failed to persist new workspace mapping to file", extra={"error": str(e)})
+        except (OSError, TypeError) as e:
+            logger.error("Failed to persist new workspace mapping to file: %s", e)
 
         await message.reply_text(
             f"Workspace updated to: `{new_path}`\n\n"

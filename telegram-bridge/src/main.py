@@ -13,7 +13,7 @@ logger = get_logger("main")
 
 async def shutdown(bot: TelegramBridgeBot, sig: Any) -> None:
     """Gracefully shuts down the bot daemon on receipt of signal."""
-    logger.info(f"Received exit signal {sig.name}, stopping bridge...")
+    logger.info("Received exit signal %s, stopping bridge...", sig.name)
     await bot.stop()
     tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
     for task in tasks:
@@ -44,7 +44,7 @@ async def main() -> None:
     try:
         settings = load_settings()
     except Exception as e:
-        logger.critical(f"Configuration failure: {e}", exc_info=True)
+        logger.critical("Configuration failure: %s", e, exc_info=True)
         sys.exit(1)
 
     bot = TelegramBridgeBot(settings)
@@ -58,7 +58,7 @@ async def main() -> None:
     except asyncio.CancelledError:
         pass
     except Exception as e:
-        logger.critical(f"Daemon crashed: {e}", exc_info=True)
+        logger.critical("Daemon crashed: %s", e, exc_info=True)
         sys.exit(1)
 
 

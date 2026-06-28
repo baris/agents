@@ -2,6 +2,8 @@ import json
 import os
 import tempfile
 
+import pytest
+
 from src.config import Settings
 
 
@@ -43,3 +45,26 @@ def test_topic_mappings_loading() -> None:
         assert settings.topic_mappings[200] == expected_expanded
     finally:
         os.unlink(temp_filename)
+
+
+def test_settings_invalid_token() -> None:
+    """Verifies that validation fails if the bot token is empty."""
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        Settings(
+            telegram_bot_token="",
+            whitelisted_user_id=12345,
+            default_workspace_dir="/tmp/test_workspace",
+        )
+
+
+def test_settings_invalid_user_id() -> None:
+    """Verifies that validation fails if whitelisted_user_id is 0."""
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        Settings(
+            telegram_bot_token="abc:123",
+            whitelisted_user_id=0,
+            default_workspace_dir="/tmp/test_workspace",
+        )
+

@@ -1,6 +1,5 @@
-import asyncio
 import os
-from collections.abc import AsyncGenerator, Callable, Awaitable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import Any
 
 from google.antigravity import Agent, LocalAgentConfig
@@ -24,9 +23,11 @@ class AgentSession:
         self.agent: Agent | None = None
         self.auto_accept = False
         self.is_running = False
+        self.chat_id: int | None = None
 
     def __deepcopy__(self, memo: dict[int, Any]) -> "AgentSession":
-        # Return self to prevent deep copying the session, which contains non-picklable bot references.
+        # Return self to prevent deep copying the session, which contains
+        # non-picklable bot references.
         return self
 
     def _create_policies(self) -> list[Any]:

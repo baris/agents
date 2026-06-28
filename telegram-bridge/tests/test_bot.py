@@ -1,5 +1,5 @@
 import asyncio
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from telegram import CallbackQuery, Message, Update, User
@@ -96,3 +96,74 @@ async def test_callback_resolution() -> None:
     assert future.done()
     assert future.result() is True
     query.edit_message_text.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_handle_workspace_command() -> None:
+    """Verifies the /workspace command views and changes workspace path."""
+    settings = create_settings()
+    bot = TelegramBridgeBot(settings)
+    bot.agent_manager = MagicMock()
+
+    mock_session = MagicMock()
+    mock_session.workspace_dir = "/old/path"
+    mock_session.is_running = False
+    mock_session.close = AsyncMock()
+    bot.agent_manager.get_session.return_value = mock_session
+    bot.agent_manager.topic_mappings = {}
+
+    # Case 1: View path
+    update = MagicMock(spec=Update)
+    user = MagicMock(spec=User)
+    user.id = 12345
+    update.effective_user = user
+    message = MagicMock(spec=Message)
+    message.text = "/workspace"
+    message.message_thread_id = 123
+    update.message = message
+
+    await bot.handle_workspace(update, MagicMock())
+    message.reply_text.assert_called_with(
+        "Current workspace: `/old/path`\n\nTo change it, use: `/workspace <absolute_path>`",
+        parse_mode="Markdown",
+        message_thread_id=123,
+    )
+
+    # Case 2: Change path
+    message.text = "/workspace /new/path"
+    await bot.handle_workspace(update, MagicMock())
+    assert mock_session.workspace_dir == "/new/path"
+    assert bot.agent_manager.topic_mappings[123] == "/new/path"
+    assert "Workspace updated to" in message.reply_text.call_args[0][0]
+
+
+@pytest.mark.asyncio
+async def test_dynamic_chat_id_routing() -> None:
+    """Verifies that incoming prompts update the session chat_id for approval routing."""
+    settings = create_settings()
+    bot = TelegramBridgeBot(settings)
+    bot.agent_manager = MagicMock()
+
+    mock_session = MagicMock()
+    mock_session.is_running = False
+    bot.agent_manager.get_session.return_value = mock_session
+
+    update = MagicMock(spec=Update)
+    user = MagicMock(spec=User)
+    user.id = 12345
+    update.effective_user = user
+    
+    # Setup mock chat
+    chat = MagicMock()
+    chat.id = 99999
+    update.effective_chat = chat
+
+    message = MagicMock(spec=Message)
+    message.text = "Hello world"
+    message.message_thread_id = 456
+    update.message = message
+
+    await bot.handle_message(update, MagicMock())
+    # Should store the chat ID in the session
+    assert mock_session.chat_id == 99999
+

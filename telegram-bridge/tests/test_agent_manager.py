@@ -97,3 +97,39 @@ async def test_agent_session_chat_streaming() -> None:
         ("text", "token1"),
         ("text", "token2"),
     ]
+
+
+@pytest.mark.asyncio
+async def test_agent_session_close() -> None:
+    """Verifies that close cleans up the agent context properly."""
+    session = AgentSession(
+        topic_id=123, workspace_dir="/tmp/test_workspace", approval_callback=AsyncMock()
+    )
+    mock_agent = MagicMock()
+    mock_agent.__aexit__ = AsyncMock()
+    session.agent = mock_agent
+
+    await session.close()
+    assert session.agent is None
+    mock_agent.__aexit__.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_agent_manager_close_all() -> None:
+    """Verifies that close_all closes all sessions and clears the registry."""
+    manager = AgentManager(
+        default_workspace="/tmp/default_workspace",
+        topic_mappings={},
+        approval_callback=AsyncMock(),
+    )
+    session1 = manager.get_session(123)
+    session2 = manager.get_session(456)
+
+    session1.close = AsyncMock()
+    session2.close = AsyncMock()
+
+    await manager.close_all()
+    session1.close.assert_called_once()
+    session2.close.assert_called_once()
+    assert len(manager.sessions) == 0
+

@@ -28,3 +28,7 @@ mcp_config.json.bak
 # Test coverage
 .coverage
 htmlcov/
+
+# Build and egg artifacts
+*.egg-info/
+telegram-bridge/src/telegram_bridge.egg-info/
