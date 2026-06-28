@@ -1,0 +1,47 @@
+{
+  "userSettings": {
+    "globalPermissionGrants": {
+      "allow": [
+        "read_file(/Users/tbmetin/.agents/skills/gws-shared/SKILL.md)",
+        "command(./scripts/context.sh)",
+        "command(.venv/bin/pytest)",
+        "command(.venv/bin/python)",
+        "command(/opt/homebrew/bin/uv)",
+        "command(find)",
+        "command(git -C /Users/tbmetin/repos/agents branch -a)",
+        "command(git -C /Users/tbmetin/repos/agents checkout claude/review-agent-prompts-WHZgy)",
+        "command(git -C /Users/tbmetin/repos/agents checkout main)",
+        "command(git -C /Users/tbmetin/repos/agents fetch origin)",
+        "command(git -C /Users/tbmetin/repos/agents log -n 5 --oneline)",
+        "command(git -C /Users/tbmetin/repos/agents log main..claude/review-agent-prompts-WHZgy --oneline)",
+        "command(git -C /Users/tbmetin/repos/agents merge claude/review-agent-prompts-WHZgy)",
+        "command(git -C /Users/tbmetin/repos/agents push origin claude/review-agent-prompts-WHZgy)",
+        "command(git -C /Users/tbmetin/repos/agents push origin main)",
+        "command(git -C /Users/tbmetin/repos/agents reset --hard origin/main)",
+        "command(git -C /Users/tbmetin/repos/agents status)",
+        "command(git add)",
+        "command(git diff)",
+        "command(git log)",
+        "command(git reflog)",
+        "command(git status)",
+        "command(grep)",
+        "command(head)",
+        "command(ls)",
+        "command(npx)",
+        "command(pytest)",
+        "command(python)",
+        "command(python3)",
+        "command(sort)",
+        "command(tail)",
+        "command(uv)",
+        "command(which)",
+        "command(./.venv/bin/)",
+        "command(node -v)",
+        "command(\\.venv/bin/ruff)"
+      ]
+    },
+    "remoteControlHostname": "baris-mac-metin-home-misty-photon",
+    "themeMode": "THEME_MODE_LIGHT",
+    "useAiCredits": false
+  }
+}

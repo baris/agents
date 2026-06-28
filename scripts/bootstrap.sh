@@ -44,7 +44,41 @@ confirm_overwrite() {
 # ============================================================================
 
 # Create directories
-mkdir -p ~/.gemini ~/.claude ~/.gemini/templates ~/.claude/templates
+mkdir -p ~/.gemini ~/.claude ~/.gemini/templates ~/.claude/templates ~/.gemini/config
+
+# Install config.json
+if [[ -f ~/.gemini/config/config.json ]]; then
+    if [[ -L ~/.gemini/config/config.json ]]; then
+        ln -sf "$AGENTS_REPO/config/config.json" ~/.gemini/config/config.json
+        echo "✓ Updated symlink ~/.gemini/config/config.json"
+    elif confirm_overwrite "~/.gemini/config/config.json"; then
+        mv ~/.gemini/config/config.json ~/.gemini/config/config.json.bak
+        ln -sf "$AGENTS_REPO/config/config.json" ~/.gemini/config/config.json
+        echo "✓ Backed up and symlinked ~/.gemini/config/config.json"
+    else
+        echo "⊘ Skipped ~/.gemini/config/config.json"
+    fi
+else
+    ln -sf "$AGENTS_REPO/config/config.json" ~/.gemini/config/config.json
+    echo "✓ Symlinked ~/.gemini/config/config.json"
+fi
+
+# Install mcp_config.json
+if [[ -f ~/.gemini/config/mcp_config.json ]]; then
+    if [[ -L ~/.gemini/config/mcp_config.json ]]; then
+        ln -sf "$AGENTS_REPO/config/mcp_config.json" ~/.gemini/config/mcp_config.json
+        echo "✓ Updated symlink ~/.gemini/config/mcp_config.json"
+    elif confirm_overwrite "~/.gemini/config/mcp_config.json"; then
+        mv ~/.gemini/config/mcp_config.json ~/.gemini/config/mcp_config.json.bak
+        ln -sf "$AGENTS_REPO/config/mcp_config.json" ~/.gemini/config/mcp_config.json
+        echo "✓ Backed up and symlinked ~/.gemini/config/mcp_config.json"
+    else
+        echo "⊘ Skipped ~/.gemini/config/mcp_config.json"
+    fi
+else
+    ln -sf "$AGENTS_REPO/config/mcp_config.json" ~/.gemini/config/mcp_config.json
+    echo "✓ Symlinked ~/.gemini/config/mcp_config.json"
+fi
 
 # Install GEMINI.md
 if [[ -f ~/.gemini/GEMINI.md ]]; then
@@ -121,6 +155,7 @@ echo ""
 echo "  ~/.gemini/"
 echo "    GEMINI.md           - Agent instructions for Gemini CLI & Antigravity"
 echo "    templates/          - Doc templates (ARCHITECTURE, ADR, TODO, DONE, pre-commit)"
+echo "    config/             - Symlinked configurations (config.json, mcp_config.json)"
 echo ""
 echo "  ~/.claude/"
 echo "    CLAUDE.md           - Agent instructions for Claude Code"
