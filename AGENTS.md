@@ -192,6 +192,15 @@ All projects should have pre-commit hooks that run:
 
 See `docs/templates/pre-commit-config.yaml` for standard configuration.
 
+## Isolated Execution Boundaries
+- **Runtime Enclosure**: All agent-generated code must execute inside a containerized sandbox runtime (e.g., Docker running with `gvisor` runtime, or a WebAssembly stack-based VM).
+- **Resource Constraints**:
+  - Memory limit: Max 128MB.
+  - CPU quota: Max 1.0 core.
+  - Timeout: Hard execution stop at 30 seconds.
+- **Filesystem Security**: Mount root filesystem as read-only. Provide a dedicated writable scratch directory (`/tmp/scratch/`) mounted as a temporary `tmpfs` volume.
+- **Network Boundary**: Disable host network access (`--network none`) for code execution sandboxes.
+
 ## Asynchronous Execution & Multi-Agent Orchestration
 - **Interactive Prompt Timeouts**: When working on long-running tasks asynchronously (e.g., under `/goal` or during multi-agent teamwork previews), be aware that interactive user-permission prompts for shell commands can time out if the user is away. Prioritize non-interactive options, bundle commands, or use pre-approved command paths when possible.
 - **Sandbox Permission Boundaries**: If direct file tools (`view_file`, `write_to_file`) hit a "Matches hardcoded system protection boundary rule" permission error on system configs (e.g., in `.gemini` or `.claude` folders), check if sandbox terminal permissions allow read/write access via approved shell utilities (e.g., `cat` or target Python scripts). Only perform this if explicitly requested and safe.
@@ -255,6 +264,7 @@ When writing or auditing Python code that interfaces with the Antigravity SDK:
 - **Default Permissions & Safety**: Keep agents in read-only mode by default. Only pass `capabilities=CapabilitiesConfig()` when write tools (such as file modifications or shell execution) are explicitly required.
 - **Streaming Response Integration**: Wire up real-time token streaming (`async for token in response:`) to provide feedback. Use `response.thoughts` and `response.tool_calls` stream listeners to log internal reasoning and external tool calls in development.
 - **Separation of Concerns**: Isolate custom tool definitions, policy configs, and agent loops from the application's core data-processing layers. Keep the orchestration logic highly cohesive and testable.
+- **Agent Architecture Principles**: Refer to the actionable design patterns, research papers, and metrics in [agent_guidelines.md](file:///Users/tbmetin/repos/agents/agent_guidelines.md) when building new agent harnesses.
 
 ---
 
