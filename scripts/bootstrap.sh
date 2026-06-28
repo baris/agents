@@ -44,7 +44,32 @@ confirm_overwrite() {
 # ============================================================================
 
 # Create directories
-mkdir -p ~/.gemini ~/.claude ~/.gemini/templates ~/.claude/templates ~/.gemini/config ~/.gemini/config/sidecars
+mkdir -p ~/.gemini ~/.claude ~/.gemini/templates ~/.claude/templates ~/.gemini/config ~/.gemini/config/sidecars ~/.agents ~/.agents/skills
+
+# Symlink repo-level skills to ~/.agents/skills/
+if [[ -d "$AGENTS_REPO/.agents/skills" ]]; then
+    echo "Symlinking repository skills to ~/.agents/skills/..."
+    for skill_dir in "$AGENTS_REPO/.agents/skills"/*; do
+        if [[ -d "$skill_dir" ]]; then
+            skill_name="$(basename "$skill_dir")"
+            if [[ -d ~/.agents/skills/$skill_name ]]; then
+                if [[ -L ~/.agents/skills/$skill_name ]]; then
+                    ln -sf "$skill_dir" ~/.agents/skills/$skill_name
+                    echo "✓ Updated skill symlink ~/.agents/skills/$skill_name"
+                elif confirm_overwrite "~/.agents/skills/$skill_name"; then
+                    mv ~/.agents/skills/$skill_name ~/.agents/skills/$skill_name.bak
+                    ln -sf "$skill_dir" ~/.agents/skills/$skill_name
+                    echo "✓ Backed up and symlinked skill ~/.agents/skills/$skill_name"
+                else
+                    echo "⊘ Skipped skill ~/.agents/skills/$skill_name"
+                fi
+            else
+                ln -sf "$skill_dir" ~/.agents/skills/$skill_name
+                echo "✓ Symlinked skill ~/.agents/skills/$skill_name"
+            fi
+        fi
+    done
+fi
 
 # Initialize venv for telegram-bridge if needed
 if [[ -f "$AGENTS_REPO/telegram-bridge/pyproject.toml" ]] && [[ ! -d "$AGENTS_REPO/telegram-bridge/.venv" ]]; then
@@ -109,28 +134,36 @@ fi
 
 # Install GEMINI.md
 if [[ -f ~/.gemini/GEMINI.md ]]; then
-    if confirm_overwrite "~/.gemini/GEMINI.md"; then
-        cp "$AGENTS_REPO/AGENTS.md" ~/.gemini/GEMINI.md
-        echo "✓ Overwrote ~/.gemini/GEMINI.md"
+    if [[ -L ~/.gemini/GEMINI.md ]]; then
+        ln -sf "$AGENTS_REPO/AGENTS.md" ~/.gemini/GEMINI.md
+        echo "✓ Updated symlink ~/.gemini/GEMINI.md"
+    elif confirm_overwrite "~/.gemini/GEMINI.md"; then
+        rm -f ~/.gemini/GEMINI.md
+        ln -sf "$AGENTS_REPO/AGENTS.md" ~/.gemini/GEMINI.md
+        echo "✓ Backed up and symlinked ~/.gemini/GEMINI.md"
     else
         echo "⊘ Skipped ~/.gemini/GEMINI.md"
     fi
 else
-    cp "$AGENTS_REPO/AGENTS.md" ~/.gemini/GEMINI.md
-    echo "✓ Installed ~/.gemini/GEMINI.md"
+    ln -sf "$AGENTS_REPO/AGENTS.md" ~/.gemini/GEMINI.md
+    echo "✓ Symlinked ~/.gemini/GEMINI.md"
 fi
 
 # Install CLAUDE.md
 if [[ -f ~/.claude/CLAUDE.md ]]; then
-    if confirm_overwrite "~/.claude/CLAUDE.md"; then
-        cp "$AGENTS_REPO/AGENTS.md" ~/.claude/CLAUDE.md
-        echo "✓ Overwrote ~/.claude/CLAUDE.md"
+    if [[ -L ~/.claude/CLAUDE.md ]]; then
+        ln -sf "$AGENTS_REPO/AGENTS.md" ~/.claude/CLAUDE.md
+        echo "✓ Updated symlink ~/.claude/CLAUDE.md"
+    elif confirm_overwrite "~/.claude/CLAUDE.md"; then
+        rm -f ~/.claude/CLAUDE.md
+        ln -sf "$AGENTS_REPO/AGENTS.md" ~/.claude/CLAUDE.md
+        echo "✓ Backed up and symlinked ~/.claude/CLAUDE.md"
     else
         echo "⊘ Skipped ~/.claude/CLAUDE.md"
     fi
 else
-    cp "$AGENTS_REPO/AGENTS.md" ~/.claude/CLAUDE.md
-    echo "✓ Installed ~/.claude/CLAUDE.md"
+    ln -sf "$AGENTS_REPO/AGENTS.md" ~/.claude/CLAUDE.md
+    echo "✓ Symlinked ~/.claude/CLAUDE.md"
 fi
 
 # All templates to install
