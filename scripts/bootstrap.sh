@@ -44,7 +44,34 @@ confirm_overwrite() {
 # ============================================================================
 
 # Create directories
-mkdir -p ~/.gemini ~/.claude ~/.gemini/templates ~/.claude/templates ~/.gemini/config
+mkdir -p ~/.gemini ~/.claude ~/.gemini/templates ~/.claude/templates ~/.gemini/config ~/.gemini/config/sidecars
+
+# Initialize venv for telegram-bridge if needed
+if [[ -f "$AGENTS_REPO/telegram-bridge/pyproject.toml" ]] && [[ ! -d "$AGENTS_REPO/telegram-bridge/.venv" ]]; then
+    echo "Initializing virtual environment for telegram-bridge..."
+    if command -v uv >/dev/null 2>&1; then
+        (cd "$AGENTS_REPO/telegram-bridge" && uv venv && uv pip install -r pyproject.toml)
+    else
+        (cd "$AGENTS_REPO/telegram-bridge" && python3 -m venv .venv && .venv/bin/pip install .)
+    fi
+fi
+
+# Install telegram-bridge sidecar
+if [[ -d ~/.gemini/config/sidecars/telegram-bridge ]]; then
+    if [[ -L ~/.gemini/config/sidecars/telegram-bridge ]]; then
+        ln -sf "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
+        echo "✓ Updated symlink ~/.gemini/config/sidecars/telegram-bridge"
+    elif confirm_overwrite "~/.gemini/config/sidecars/telegram-bridge"; then
+        mv ~/.gemini/config/sidecars/telegram-bridge ~/.gemini/config/sidecars/telegram-bridge.bak
+        ln -sf "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
+        echo "✓ Backed up and symlinked ~/.gemini/config/sidecars/telegram-bridge"
+    else
+        echo "⊘ Skipped ~/.gemini/config/sidecars/telegram-bridge"
+    fi
+else
+    ln -sf "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
+    echo "✓ Symlinked ~/.gemini/config/sidecars/telegram-bridge"
+fi
 
 # Install config.json
 if [[ -f ~/.gemini/config/config.json ]]; then
@@ -156,6 +183,7 @@ echo "  ~/.gemini/"
 echo "    GEMINI.md           - Agent instructions for Gemini CLI & Antigravity"
 echo "    templates/          - Doc templates (ARCHITECTURE, ADR, TODO, DONE, pre-commit)"
 echo "    config/             - Symlinked configurations (config.json, mcp_config.json)"
+echo "    sidecars/           - Symlinked sidecars (telegram-bridge)"
 echo ""
 echo "  ~/.claude/"
 echo "    CLAUDE.md           - Agent instructions for Claude Code"

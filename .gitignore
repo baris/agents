@@ -1,0 +1,30 @@
+# Global ignores
+.DS_Store
+*.bak
+
+# Environment secrets (MANDATORY)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+
+# Python virtual envs and caches
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Local databases/configurations
+sessions.db
+sessions.db-shm
+sessions.db-wal
+config.json.bak
+mcp_config.json.bak
+
+# Test coverage
+.coverage
+htmlcov/

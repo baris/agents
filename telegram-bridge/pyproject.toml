@@ -1,0 +1,36 @@
+[project]
+name = "telegram-bridge"
+version = "0.1.0"
+description = "Telegram Remote Control Bridge for Antigravity 2.0"
+requires-python = ">=3.11"
+dependencies = [
+    "google-antigravity>=0.1.5",
+    "python-telegram-bot>=22.8",
+    "pydantic-settings>=2.0.0",
+    "python-json-logger>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.20.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "C4"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

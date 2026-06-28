@@ -1,0 +1,5 @@
+google-antigravity>=0.1.5
+python-telegram-bot>=22.8
+pydantic-settings>=2.0.0
+python-json-logger>=2.0.0
+python-dotenv>=1.0.0

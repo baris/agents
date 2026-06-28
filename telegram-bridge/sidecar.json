@@ -1,0 +1,6 @@
+{
+  "command": ".venv/bin/python",
+  "args": ["-m", "src.main"],
+  "restart_policy": "always",
+  "description": "Telegram Remote Control Bridge for Antigravity 2.0"
+}
