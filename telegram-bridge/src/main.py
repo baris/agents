@@ -27,8 +27,10 @@ def setup_signal_handlers(bot: TelegramBridgeBot) -> None:
     """Binds SIGINT and SIGTERM handler callback functions."""
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
+
         def handle_sig(s: signal.Signals = sig) -> None:
             asyncio.create_task(shutdown(bot, s))
+
         try:
             loop.add_signal_handler(sig, handle_sig)
         except NotImplementedError:

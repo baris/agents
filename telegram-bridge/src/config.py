@@ -54,11 +54,17 @@ class Settings(BaseSettings):
         if not self.use_topics:
             return
 
-        if not os.path.exists(self.topic_mappings_file):
+        resolved_file = self.topic_mappings_file
+        if not os.path.isabs(resolved_file):
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            resolved_file = os.path.abspath(os.path.join(project_root, resolved_file))
+            self.topic_mappings_file = resolved_file
+
+        if not os.path.exists(resolved_file):
             return
 
         try:
-            with open(self.topic_mappings_file) as f:
+            with open(resolved_file) as f:
                 data = json.load(f)
                 self.topic_mappings = {
                     int(k): os.path.abspath(os.path.expanduser(str(v))) for k, v in data.items()

@@ -192,6 +192,36 @@ class TelegramBridgeBot:
         if args:
             details += f"*Arguments:*\n`{args}`\n"
 
+        # Check path containment for shell execution to raise warnings for out-of-workspace activity
+        if name == "run_command":
+            cmd = args.get("CommandLine", "")
+            cwd = args.get("Cwd", "")
+            assert self.agent_manager is not None
+            session = self.agent_manager.get_session(topic_id)
+            workspace = os.path.abspath(session.workspace_dir)
+
+            is_outside = False
+            if cwd:
+                abs_cwd = os.path.abspath(os.path.expanduser(cwd))
+                if not abs_cwd.startswith(workspace):
+                    is_outside = True
+
+            # Simple token checking to catch absolute path or traversal traversal escapes
+            for word in cmd.split():
+                if os.path.isabs(word):
+                    abs_word = os.path.abspath(word)
+                    if not abs_word.startswith(workspace):
+                        is_outside = True
+                        break
+                elif ".." in word:
+                    is_outside = True
+                    break
+
+            if is_outside:
+                details += (
+                    "\n⚠️ *WARNING:* Command targets locations outside the active workspace!\n"
+                )
+
         keyboard = [
             [
                 InlineKeyboardButton("Approve ✅", callback_data=f"approve:{future_id}"),
@@ -268,7 +298,7 @@ class TelegramBridgeBot:
         )
 
         # Read TODO.md if it exists
-        todo_path = os.path.join(self.settings.default_workspace_dir, "docs/TODO.md")
+        todo_path = os.path.join(session.workspace_dir, "docs/TODO.md")
         if os.path.exists(todo_path):
             try:
                 with open(todo_path) as f:
@@ -281,9 +311,7 @@ class TelegramBridgeBot:
         else:
             status_text += "_No docs/TODO.md file found in the workspace root._"
 
-        await message.reply_text(
-            status_text, parse_mode="Markdown", message_thread_id=thread_id
-        )
+        await message.reply_text(status_text, parse_mode="Markdown", message_thread_id=thread_id)
 
     async def handle_autoaccept(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Toggles the auto-accept state flag for the active workspace session."""
@@ -390,11 +418,7 @@ class TelegramBridgeBot:
         self.agent_manager.topic_mappings[thread_id or 0] = new_path
 
         try:
-            mappings_path = os.path.join(
-                self.settings.default_workspace_dir,
-                "telegram-bridge",
-                self.settings.topic_mappings_file,
-            )
+            mappings_path = self.settings.topic_mappings_file
             serialized_mappings = {str(k): v for k, v in self.agent_manager.topic_mappings.items()}
             with open(mappings_path, "w") as f:
                 json.dump(serialized_mappings, f, indent=2)
@@ -402,8 +426,7 @@ class TelegramBridgeBot:
             logger.error("Failed to persist new workspace mapping to file: %s", e)
 
         await message.reply_text(
-            f"Workspace updated to: `{new_path}`\n\n"
-            f"The mapping has been persisted.",
+            f"Workspace updated to: `{new_path}`\n\nThe mapping has been persisted.",
             parse_mode="Markdown",
             message_thread_id=thread_id,
         )
