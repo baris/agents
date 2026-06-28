@@ -54,17 +54,17 @@ if [[ -d "$AGENTS_REPO/.agents/skills" ]]; then
             skill_name="$(basename "$skill_dir")"
             if [[ -d ~/.agents/skills/$skill_name ]]; then
                 if [[ -L ~/.agents/skills/$skill_name ]]; then
-                    ln -sf "$skill_dir" ~/.agents/skills/$skill_name
+                    ln -sfn "$skill_dir" ~/.agents/skills/$skill_name
                     echo "✓ Updated skill symlink ~/.agents/skills/$skill_name"
                 elif confirm_overwrite "~/.agents/skills/$skill_name"; then
                     mv ~/.agents/skills/$skill_name ~/.agents/skills/$skill_name.bak
-                    ln -sf "$skill_dir" ~/.agents/skills/$skill_name
+                    ln -sfn "$skill_dir" ~/.agents/skills/$skill_name
                     echo "✓ Backed up and symlinked skill ~/.agents/skills/$skill_name"
                 else
                     echo "⊘ Skipped skill ~/.agents/skills/$skill_name"
                 fi
             else
-                ln -sf "$skill_dir" ~/.agents/skills/$skill_name
+                ln -sfn "$skill_dir" ~/.agents/skills/$skill_name
                 echo "✓ Symlinked skill ~/.agents/skills/$skill_name"
             fi
         fi
@@ -84,17 +84,17 @@ fi
 # Install telegram-bridge sidecar
 if [[ -d ~/.gemini/config/sidecars/telegram-bridge ]]; then
     if [[ -L ~/.gemini/config/sidecars/telegram-bridge ]]; then
-        ln -sf "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
+        ln -sfn "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
         echo "✓ Updated symlink ~/.gemini/config/sidecars/telegram-bridge"
     elif confirm_overwrite "~/.gemini/config/sidecars/telegram-bridge"; then
         mv ~/.gemini/config/sidecars/telegram-bridge ~/.gemini/config/sidecars/telegram-bridge.bak
-        ln -sf "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
+        ln -sfn "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
         echo "✓ Backed up and symlinked ~/.gemini/config/sidecars/telegram-bridge"
     else
         echo "⊘ Skipped ~/.gemini/config/sidecars/telegram-bridge"
     fi
 else
-    ln -sf "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
+    ln -sfn "$AGENTS_REPO/telegram-bridge" ~/.gemini/config/sidecars/telegram-bridge
     echo "✓ Symlinked ~/.gemini/config/sidecars/telegram-bridge"
 fi
 
