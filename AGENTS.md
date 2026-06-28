@@ -233,6 +233,32 @@ See `docs/templates/pre-commit-config.yaml` for standard configuration.
 
 ---
 
+## Investigations & Forensic Auditing Guidelines
+When tasked with forensic audits, document checks, business/financial modeling reviews, or other investigations:
+- **Mathematical Consistency**: Verify that all calculations (e.g., unit economics, COGS, TAM, cap table dilutions) are mathematically consistent across all files and documents. Never assume numbers are correct without checking the math yourself.
+- **Citing Benchmarks**: Ensure all quantitative assertions are backed by cited research, historical data, or explicit benchmarks (e.g., from reference materials or verified external sources).
+- **Hard Truths**: Accurately document the status of agreements, term sheets, or traction (e.g., do not claim agreements/LOIs are signed or final if they are verbal or in negotiation). State exactly what is confirmed and what is conditional.
+- **Zero-Placeholder Compliance**: Every output document must be free of placeholders, generic values, or template remnants (`_____`, `[TODO]`, `[placeholder]`, or `[TBD]`). Complete all details or explicitly leave them out if they cannot be verified.
+- **Cross-Checking**: Look for contradictions between different project deliverables (e.g., business plan vs. YC application answers) and call them out explicitly.
+
+## Personal Assistant & Google Workspace Safety Guidelines
+When acting as a personal agent or automating productivity tasks:
+- **Explicit Authorization for Write/Delete Operations**: Never send emails, add/modify calendar events, delete files in Google Drive, or modify contact directories without the user's explicit confirmation of the exact operation.
+- **Minimal Access Boundary**: Do not read personal emails, files, or calendar logs unless they are directly relevant to the current task. Never store or cache personal information globally.
+- **Action Summaries**: Present modifications (e.g., calendar rescheduling, email drafts) as high-level, clear summaries. Do not clutter responses with extensive, raw logs of API responses.
+- **Inbox Triage & Prioritization**: When filtering or summarizing email/tasks, group items by clear themes (e.g., high-priority business, personal schedule, spam/newsletters) and list them chronologically.
+- **Conversion to Action Items**: Support easy conversion of parsed workspace data (e.g., action items in meeting notes or follow-up emails) into actionable checklists (e.g., in a `TODO.md` or a local task tracker).
+
+## Programmatic Agent Development (Antigravity SDK)
+When writing or auditing Python code that interfaces with the Antigravity SDK:
+- **Context Manager Lifecycle**: Always use the `Agent` class as an asynchronous context manager to ensure proper startup and clean teardown of the compiled binary (`async with Agent(config) as agent:`).
+- **Default Permissions & Safety**: Keep agents in read-only mode by default. Only pass `capabilities=CapabilitiesConfig()` when write tools (such as file modifications or shell execution) are explicitly required.
+- **Streaming Response Integration**: Wire up real-time token streaming (`async for token in response:`) to provide feedback. Use `response.thoughts` and `response.tool_calls` stream listeners to log internal reasoning and external tool calls in development.
+- **Separation of Concerns**: Isolate custom tool definitions, policy configs, and agent loops from the application's core data-processing layers. Keep the orchestration logic highly cohesive and testable.
+
+---
+
+
 ## Language-Specific Guidelines
 
 ### Python Projects
@@ -334,3 +360,8 @@ Required setup:
 | No type hints | Add types to all function signatures |
 | `any` in TypeScript | Replace with proper type or document why |
 | No tests | Write tests before marking task complete |
+| Placeholder in final doc (`_____`, `[TODO]`) | Replace with actual content or remove |
+| Unverified math in audit | Calculate and verify consistency across files |
+| GWS write without check | Ask for user approval before sending/modifying |
+| Direct `Agent` instantiation | Use `Agent` class as async context manager |
+
